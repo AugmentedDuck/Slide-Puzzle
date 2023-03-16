@@ -1,16 +1,21 @@
 const tiles = []
 const images = []
+let sourceImage;
 let emptyImg;
 let windowSize;
+let gameSize = 4;
 
 function preload(){
-  for(let i = 0; i < 15; i++){
-    images[i] = loadImage("images/img" + i + ".png")
+  sourceImage = loadImage("images/choochoobot.png")
+
+  for(let i = 0; i < gameSize * gameSize - 1; i++){
+
+    images[i] = sourceImage //NOT WORKING :(
 
     tiles[i] = new Tiles(images[i], i)
   }
   emptyImg = loadImage("images/empty.png")
-  tiles[15] = new Tiles(emptyImg, 15) 
+  tiles[gameSize * gameSize - 1] = new Tiles(emptyImg, gameSize * gameSize - 1) 
 }
 
 function setup() {
@@ -22,7 +27,7 @@ function setup() {
 
   createCanvas(windowSize, windowSize);
 
-  //shuffle(tiles, true);
+  shuffle(tiles, true);
 }
 
 function draw() {
@@ -34,10 +39,10 @@ function draw() {
 }
 
 function show(index){
-  let placementY = index % 4;
-  let placementX = floor(index / 4);
+  let placementY = index % gameSize;
+  let placementX = floor(index / gameSize);
 
-  image(tiles[index].image, placementX * windowSize / 4, placementY * windowSize / 4, windowSize / 4 - 10, windowSize / 4 - 10);
+  image(tiles[index].image, placementX * windowSize / gameSize, placementY * windowSize / gameSize, windowSize / gameSize - 10, windowSize / gameSize - 10);
 }
 
 function isSolved(){
@@ -52,7 +57,7 @@ function isSolved(){
 
 function findEmptyTile(){
   for(let i = 0; i < tiles.length; i++){
-    if(tiles[i].placement == 15){
+    if(tiles[i].placement == gameSize * gameSize - 1){
       return i;
     }
   }
@@ -61,27 +66,19 @@ function findEmptyTile(){
 function mousePressed(){
   const coords = [0,0]
 
-  if( 0 < mouseX && mouseX < windowSize / 4) {
-    coords[0] = 0
-  } else if (windowSize / 4 < mouseX && mouseX < windowSize / 4 * 2) {
-    coords[0] = 1
-  } else if (windowSize / 4 * 2 < mouseX && mouseX < windowSize / 4 * 3) {
-    coords[0] = 2
-  } else if (windowSize / 4 * 3 < mouseX && mouseX < windowSize) {
-    coords[0] = 3
+  for (let i = 0; i < gameSize; i++){
+    if ((windowSize / gameSize) * i < mouseX && mouseX < (windowSize / gameSize) * (i + 1)) {
+      coords[0] = i;
+    }
+  }
+  
+  for (let i = 0; i < gameSize; i++){
+    if ((windowSize / gameSize) * i < mouseY && mouseY < (windowSize / gameSize) * (i + 1)) {
+      coords[1] = i;
+    }
   }
 
-  if( 0 < mouseY && mouseY < windowSize / 4) {
-    coords[1] = 0
-  } else if (windowSize / 4 < mouseY && mouseY < windowSize / 4 * 2) {
-    coords[1] = 1
-  } else if (windowSize / 4 * 2 < mouseY && mouseY < windowSize / 4 * 3) {
-    coords[1] = 2
-  } else if (windowSize / 4 * 3 < mouseY && mouseY < windowSize) {
-    coords[1] = 3
-  }
-
-  let mouseIndex = coords[0] * 4 + coords[1]
+  let mouseIndex = coords[0] * gameSize + coords[1]
   if (!isSolved()) {
     isNextTileEmpty(mouseIndex)
   }
@@ -90,18 +87,14 @@ function mousePressed(){
 function isNextTileEmpty(mouseIndex) {
   let i = findEmptyTile();
   
-  if(mouseIndex + 1 == i || mouseIndex - 1 == i || mouseIndex + 4 == i || mouseIndex - 4 == i) {
+  if(mouseIndex + 1 == i || mouseIndex - 1 == i || mouseIndex + gameSize == i || mouseIndex - gameSize == i) {
     swapIndexes(tiles, i, mouseIndex)
   }
 }
 
 function swapIndexes(array, index1, index2){
-  console.log(array + " : " + index1 + " : " + index2)
-
   let temp = array[index1];
   array[index1] = array[index2];
   array[index2] = temp;
-
-  console.log(array)
 } 
 
