@@ -3,27 +3,30 @@ const images = []
 let sourceImage;
 let emptyImg;
 let windowSize;
-let gameSize = 4;
+let playerMoves = 0;
+
+let gameSize = 3;
 
 function preload(){
   sourceImage = loadImage("images/choochoobot.png")
 
-  for(let i = 0; i < gameSize * gameSize - 1; i++){
-
-    images[i] = sourceImage //NOT WORKING :(
-
-    tiles[i] = new Tiles(images[i], i)
-  }
   emptyImg = loadImage("images/empty.png")
-  tiles[gameSize * gameSize - 1] = new Tiles(emptyImg, gameSize * gameSize - 1) 
 }
 
 function setup() {
-  if(windowWidth < windowHeight) {
-    windowSize = windowWidth;
-  } else {
-    windowSize = windowHeight;
+
+  windowSize = sourceImage.width;
+
+  for(let i = 0; i < gameSize * gameSize - 1; i++){
+    let placementY = i % gameSize;
+    let placementX = floor(i / gameSize);
+
+    images[i] = createImage(windowSize / gameSize, windowSize / gameSize)
+    images[i].copy(sourceImage, placementX * windowSize / gameSize, placementY * windowSize / gameSize, windowSize / gameSize, windowSize / gameSize, 0, 0, windowSize / gameSize, windowSize / gameSize)
+
+    tiles[i] = new Tiles(images[i], i)
   }
+  tiles[gameSize * gameSize - 1] = new Tiles(emptyImg, gameSize * gameSize - 1) 
 
   createCanvas(windowSize, windowSize);
 
@@ -31,10 +34,21 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  background(127);
 
   for(let i = 0; i < tiles.length; i++){
     show(i);
+  }
+
+  textAlign(CENTER, CENTER)
+  textSize(20)
+  text("MOVES: " + playerMoves, 50, 15)
+
+  if(isSolved()){
+    stroke(255)
+    textSize(32)
+    text("YOU WIN", width / 2, height / 2 - 15);
+    text("Moves: " + playerMoves, width / 2, height / 2 + 15)
   }
 }
 
@@ -88,7 +102,8 @@ function isNextTileEmpty(mouseIndex) {
   let i = findEmptyTile();
   
   if(mouseIndex + 1 == i || mouseIndex - 1 == i || mouseIndex + gameSize == i || mouseIndex - gameSize == i) {
-    swapIndexes(tiles, i, mouseIndex)
+    swapIndexes(tiles, i, mouseIndex);
+    playerMoves++;
   }
 }
 
